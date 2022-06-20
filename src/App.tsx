@@ -10,6 +10,7 @@ import {
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
+import { SolendAction } from "@solendprotocol/solend-sdk";
 import BigNumber from "bignumber.js";
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
@@ -36,18 +37,27 @@ function App() {
       const userUsdc = await getAssociatedTokenAddress(USDC, wallet.publicKey);
 
       // First instruction: Send amount to merchant
-      const ix1 = createTransferInstruction(
+      const transferToMerchant = createTransferInstruction(
         userUsdc,
         merchantUsdc,
         wallet.publicKey,
         amount
       );
 
-      transaction.add(ix1);
+      transaction.add(transferToMerchant);
 
       //! Second instruction: Create Solend instruction
-      // const ix2 =
-      // transaction.add(ix2);
+      // Create one or more (may contain setup accuont creation txns) to perform a Solend action.
+      const solendAction = await SolendAction.buildDepositTxns(
+        connection,
+        amount.toString(),
+        "USDC",
+        wallet.publicKey,
+        "production"
+      );
+
+      console.log("solendAction.lendingIxs", solendAction.lendingIxs[0]);
+      transaction.add(solendAction.lendingIxs[0]);
 
       // Send Transaction
       if (wallet.signTransaction) {
