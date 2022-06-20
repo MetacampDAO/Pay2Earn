@@ -50,7 +50,7 @@ function App() {
       // Create one or more (may contain setup accuont creation txns) to perform a Solend action.
       const solendAction = await SolendAction.buildDepositTxns(
         connection,
-        amount.toString(),
+        remainder.toString(),
         "USDC",
         wallet.publicKey,
         "production"
